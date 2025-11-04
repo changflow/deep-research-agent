@@ -30,5 +30,8 @@ all = [
     "flake8",
     "mypy",
     "langfuse",
-    "tavily-python"
+    "tavily-python",
+    "langchain",
+    "langchain-openai",
+    "python-dotenv"
 ]
