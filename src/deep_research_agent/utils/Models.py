@@ -1,8 +1,11 @@
 from langchain_openai import ChatOpenAI
 import os
-from dotenv import load_dotenv, find_dotenv
+from dotenv import load_dotenv
 from pathlib import Path
-load_dotenv(find_dotenv(filename=".env", raise_error_if_not_found=True), override=True)
+
+# 项目根目录在 ../../../
+env_path = Path(__file__).parents[3] / ".env"
+load_dotenv(dotenv_path=env_path, override=True)
 
 def get_chat_model(temperature: float = 0.7, model_name: str = "qwen3-max"):
 
