@@ -18,7 +18,7 @@ ENV/
 .env
 .env.local
 secrets/
-config/prod.yaml  # 忽略实际生产配置
+config/prod.yaml  
 
 # Logs
 *.log
