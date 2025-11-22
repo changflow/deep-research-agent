@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deep Research Agent</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
+    <link rel="stylesheet" href="styles.css">
+    <!-- 使用 marked.js 解析 Markdown (替换为更稳定的源) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.2/marked.min.js"></script>
+    <!-- 使用 html2pdf.js 生成 PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Deep Research Agent</h1>
+            <p class="subtitle">你的自主深度研究助手</p>
+        </header>
+
+        <main>
+            <!-- 输入区域 -->
+            <section id="input-section" class="card">
+                <h2>开始新研究</h2>
+                <div class="form-group">
+                    <label for="query">研究主题</label>
+                    <textarea id="query" rows="3" placeholder="例如：2025年生成式AI在医疗领域的应用趋势及其挑战"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="max-steps">最大搜索步骤</label>
+                    <input type="number" id="max-steps" value="3" min="1" max="10">
+                </div>
+                <button id="start-btn" class="btn primary">🚀 开始研究</button>
+            </section>
+
+            <!-- 状态显示区域 -->
+            <section id="status-section" class="card hidden">
+                <div class="status-bead">
+                    <span class="label">当前状态:</span>
+                    <span id="status-badge" class="badge pending">等待中</span>
+                </div>
+                <div class="progress-bar-container hidden" id="progress-container">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+                <div id="logs-container" class="logs-box">
+                    <p class="log-entry text-muted">准备就绪...</p>
+                </div>
+            </section>
+
+            <!-- 计划审批区域 -->
+            <section id="plan-section" class="card hidden">
+                <h2>📝 研究计划审批</h2>
+                <div class="notice info">
+                    AI 已生成研究计划，请审核。您可以批准执行，或提出修改意见。
+                </div>
+                <div id="plan-content" class="markdown-body"></div>
+                <div class="actions">
+                    <button id="approve-plan-btn" class="btn success">✅ 批准计划</button>
+                    <button id="reject-plan-btn" class="btn danger">❌ 拒绝/修改</button>
+                </div>
+                <div id="feedback-input" class="hidden form-group mt-2">
+                    <textarea id="plan-feedback" rows="2" placeholder="请输入修改意见..."></textarea>
+                    <button id="submit-feedback-btn" class="btn secondary">提交修改</button>
+                </div>
+            </section>
+
+            <!-- 最终报告区域 -->
+            <section id="report-section" class="card hidden">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2>📚 最终研究报告</h2>
+                    <button id="download-pdf-btn" class="btn icon" title="下载 PDF">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M5 20H19V18H5V20ZM19 9H15V3H9V9H5L12 16L19 9Z" />
+                        </svg>
+                    </button>
+                </div>
+                <div id="report-content" class="markdown-body"></div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Powered by LangGraph & Tavily</p>
+        </footer>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>

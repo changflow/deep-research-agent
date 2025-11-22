@@ -1,0 +1,402 @@
+:root {
+    --primary-color: #2563eb;
+    --primary-hover: #1d4ed8;
+    --secondary-color: #64748b;
+    --success-color: #10b981;
+    --danger-color: #ef4444;
+    --bg-color: #f8fafc;
+    --text-color: #1e293b;
+    --card-bg: #ffffff;
+    --border-color: #e2e8f0;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+header h1 {
+    font-size: 2.5rem;
+    color: var(--primary-color);
+}
+
+.subtitle {
+    color: var(--secondary-color);
+    font-size: 1.1rem;
+}
+
+.card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--border-color);
+}
+
+.hidden {
+    display: none !important;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+textarea, input[type="text"], input[type="number"] {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 1rem;
+    font-family: inherit;
+}
+
+textarea:focus, input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    ring: 2px solid var(--primary-color);
+}
+
+.btn {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.btn.primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn.primary:hover {
+    background-color: var(--primary-hover);
+}
+
+.btn.success {
+    background-color: var(--success-color);
+    color: white;
+}
+
+.btn.danger {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+.btn.secondary {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.btn.icon {
+    padding: 0.5rem;
+    line-height: 0; /* Fix alignment for svg */
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+    color: var(--secondary-color);
+    border: 1px solid var(--border-color);
+}
+
+.btn.icon:hover {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.btn.icon svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+}
+
+.status-bead {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.badge.pending { background: #e2e8f0; color: #64748b; }
+.badge.planning { background: #dbeafe; color: #1e40af; }
+.badge.executing { background: #dcfce7; color: #166534; }
+.badge.wait_for_approval { background: #fef9c3; color: #854d0e; }
+.badge.completed { background: #d1fae5; color: #065f46; }
+.badge.error { background: #fee2e2; color: #991b1b; }
+
+.progress-bar-container {
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.progress-bar {
+    height: 100%;
+    background: var(--primary-color);
+    width: 0%;
+    transition: width 0.5s ease;
+}
+
+.logs-box {
+    background: #1e293b;
+    color: #e2e8f0;
+    padding: 1rem;
+    border-radius: 6px;
+    font-family: monospace;
+    height: 150px;
+    overflow-y: auto;
+    font-size: 0.9rem;
+}
+
+.log-entry {
+    margin-bottom: 0.25rem;
+}
+
+.notice {
+    padding: 1rem;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+}
+
+.notice.info {
+    background: #eff6ff;
+    border-left: 4px solid var(--primary-color);
+    color: #1e40af;
+}
+
+.markdown-body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    line-height: 1.8;
+    font-size: 1.05rem;
+    color: #24292f;
+    overflow-wrap: break-word;
+}
+.markdown-body a {
+    color: var(--primary-color);
+    text-decoration: none;
+    word-break: break-all;
+}
+.markdown-body a:hover {
+    text-decoration: underline;
+}
+.markdown-body h1, .markdown-body h2, .markdown-body h3 {
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+.markdown-body h1 { font-size: 1.75rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; }
+.markdown-body h2 { font-size: 1.5rem; }
+.markdown-body h3 { font-size: 1.25rem; }
+.markdown-body p {
+    margin-bottom: 1rem;
+}
+.markdown-body ul, .markdown-body ol {
+    padding-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+.markdown-body li {
+    margin-bottom: 0.5rem;
+}
+/* PDF Exporter: Avoid breaking content inside elements */
+@media print {
+    .markdown-body {
+        font-size: 12pt;
+    }
+
+    .markdown-body h1, 
+    .markdown-body h2, 
+    .markdown-body h3, 
+    .markdown-body h4,
+    .markdown-body h5,
+    .markdown-body h6 {
+        page-break-after: avoid;
+        break-after: avoid;
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+    .markdown-body p, 
+    .markdown-body ul, 
+    .markdown-body ol,
+    .markdown-body table,
+    .markdown-body li,
+    .markdown-body pre,
+    .markdown-body blockquote {
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+    .markdown-body p {
+        orphans: 4;
+        widows: 4;
+    }
+
+    .container {
+        max-width: 100% !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    body {
+        background-color: white;
+    }
+
+    /* Ensure code blocks wrap to avoid overflow */
+    pre, code {
+        white-space: pre-wrap !important;
+        word-break: break-all !important;
+    }
+}
+
+.markdown-body blockquote {
+    border-left: 4px solid var(--border-color);
+    padding-left: 1rem;
+    color: var(--secondary-color);
+    margin-bottom: 1rem;
+}
+.markdown-body code {
+    background: #f1f5f9;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.875em;
+    font-family: monospace;
+}
+.mt-2 {
+    margin-top: 0.75rem;
+}
+.text-muted {
+    color: #94a3b8;
+}
+
+.actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+/* Hidden anchors for TOC compatibility */
+.markdown-body h1, 
+.markdown-body h2, 
+.markdown-body h3, 
+.markdown-body h4, 
+.markdown-body h5, 
+.markdown-body h6 {
+    position: relative;
+}
+
+.anchor-offset {
+    position: absolute;
+    top: -60px; /* Offset for sticky headers or just spacing */
+    left: 0;
+    visibility: hidden;
+}
+
+/* PDF Export Specific Styles */
+.pdf-export-mode {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 40px !important; /* Increased padding for better margins */
+    background-color: white !important;
+    overflow: visible !important; /* Ensure content isn't clipped */
+    height: auto !important;
+    min-height: 100%;
+    font-size: 12pt;
+    line-height: 1.6;
+    color: #000; /* Ensure text is black for printing */
+}
+
+.pdf-export-mode h1, 
+.pdf-export-mode h2, 
+.pdf-export-mode h3, 
+.pdf-export-mode h4,
+.pdf-export-mode h5,
+.pdf-export-mode h6 {
+    page-break-after: avoid;
+    break-after: avoid;
+    page-break-inside: avoid;
+    break-inside: avoid;
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+    color: #000;
+}
+
+/* Allow paragraphs and lists to break across pages to avoid large gaps */
+.pdf-export-mode p, 
+.pdf-export-mode ul, 
+.pdf-export-mode ol,
+.pdf-export-mode li {
+    orphans: 3;
+    widows: 3;
+}
+
+/* Prevent breaking inside these elements */
+.pdf-export-mode table,
+.pdf-export-mode pre,
+.pdf-export-mode blockquote,
+.pdf-export-mode img {
+    page-break-inside: avoid;
+    break-inside: avoid;
+    margin-bottom: 1em;
+}
+
+.pdf-export-mode pre {
+    white-space: pre-wrap !important;
+    word-break: break-all !important;
+    background-color: #f5f5f5 !important;
+    border: 1px solid #ddd;
+    padding: 10px;
+}
+
+.pdf-export-mode img {
+    max-width: 100% !important;
+}
+
+.pdf-export-mode a {
+    text-decoration: none;
+    color: #000; /* Links black for print */
+}
