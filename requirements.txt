@@ -11,3 +11,4 @@ langfuse
 redis
 asyncpg
 tavily-python
+langchain_community
