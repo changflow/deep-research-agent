@@ -43,8 +43,6 @@ Deep Research Agent 提供了一个直观的 Web 界面，支持以下核心交�
 #### 4. 任务完成与报告生成
 ![执行完成](res/completed.png)
 
-#### 5. 参考来源追踪
-![参考来源](res/reference.png)
 
 ### 📊 Langfuse Trace 示例
 查看完整的 Agent 执行链路追踪，包括规划、搜索、反思和报告生成过程：

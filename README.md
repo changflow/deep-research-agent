@@ -45,8 +45,6 @@ Deep Research Agent provides an intuitive Web interface supporting the following
 #### 4. Task Completion & Report Generation
 ![Completed](res/completed.png)
 
-#### 5. Reference Tracking
-![Reference](res/reference.png)
 
 ### 📊 Langfuse Trace Example
 View the complete Agent execution trace, including planning, searching, reflection, and report generation processes:
