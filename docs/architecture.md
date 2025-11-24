@@ -10,28 +10,28 @@ Deep Research Agent 是一个基于 LangGraph 和 LLM 构建的自主智能研�
 
 ```mermaid
 graph TD
-    Client[Web 前端 / API Client] --> API[FastAPI Server]
-    API --> Engine[Agent Engine (LangGraph)]
-    
-    subgraph "Agent Engine"
-        Plan[计划生成节点]
-        Human{人工审批}
-        Exec[执行检索节点]
-        Report[报告生成节点]
-        Memory[(State Saver)]
-        
-        Plan --> Human
-        Human -- Approve --> Exec
-        Human -- Reject/Feedback --> Plan
-        Exec --> Exec
-        Exec --> Report
-    end
-    
-    Exec --> Tools[工具集]
+    %% === Interface ===
+    Client[Web Frontend / API Client] --> API[FastAPI Server]
+
+    %% === Agent Core ===
+    API --> Plan[Plan Generation]
+    Plan --> Human{Human Approval}
+    Human -- "Approve" --> Exec[Execution Node]
+    Human -- "Reject/Feedback" --> Plan
+    Exec --> Report[Report Generation]
+
+    %% === Tools ===
+    Exec --> Tools[Toolset]
     Tools --> Search[Tavily Search API]
     Tools --> Scraper[Web Scraper]
-    
+
+    %% === Output & State ===
     Report --> Output[Markdown Report]
+    Memory[(State Saver)]
+    Plan -.-> Memory
+    Exec -.-> Memory
+    Report -.-> Memory
+
 ```
 
 ### 2.1 架构组件
