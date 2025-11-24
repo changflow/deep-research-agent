@@ -27,39 +27,70 @@ Deep Research Agent 是一个基于 Large Language Models (LLM) 和 LangGraph �
 
 ```mermaid
 graph TD
-    subgraph Interface Layer
+    subgraph Interface_Layer
         API[FastAPI / REST]
         Web[Frontend App]
     end
 
-    subgraph Orchestration Layer (LangGraph)
+    subgraph Orchestration_Layer
         Graph[State Graph]
         Checkpointer[State Persistence]
     end
 
-    subgraph Logic Layer (Nodes)
+    subgraph Logic_Layer
         PlanNode[Plan Generation]
         SearchNode[Search Execution]
         ReportNode[Report Generation]
     end
 
-    subgraph Middleware Layer
+    subgraph Middleware_Layer
         LogMW[Logging]
-        TraceMW[Tracing (Langfuse)]
+        TraceMW[Tracing Langfuse]
         ErrorMW[Error Handling]
         PerfMW[Performance Metrics]
     end
 
-    subgraph Infrastructure
-        LLM[Model Provider (OpenAI)]
-        Search[Search Provider (Tavily)]
+    subgraph Infrastructure_Layer
+        LLM[Model Provider OpenAI]
+        Search[Search Provider Tavily]
         DB[Storage]
     end
 
     API --> Graph
-    Graph --> Middleware
-    Middleware --> Logic Layer
-    Logic Layer --> Infrastructure
+    Web --> API
+    Graph --> PlanNode
+    Graph --> SearchNode
+    Graph --> ReportNode
+    Checkpointer -.-> Graph
+
+    PlanNode --> LogMW
+    PlanNode --> TraceMW
+    PlanNode --> ErrorMW
+    PlanNode --> PerfMW
+
+    SearchNode --> LogMW
+    SearchNode --> TraceMW
+    SearchNode --> ErrorMW
+    SearchNode --> PerfMW
+
+    ReportNode --> LogMW
+    ReportNode --> TraceMW
+    ReportNode --> ErrorMW
+    ReportNode --> PerfMW
+
+    LogMW --> LLM
+    LogMW --> Search
+    LogMW --> DB
+    TraceMW --> LLM
+    TraceMW --> Search
+    TraceMW --> DB
+    ErrorMW --> LLM
+    ErrorMW --> Search
+    ErrorMW --> DB
+    PerfMW --> LLM
+    PerfMW --> Search
+    PerfMW --> DB
+
 ```
 
 ## 3. 详细模块设计
