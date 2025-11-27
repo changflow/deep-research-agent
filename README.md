@@ -19,6 +19,16 @@ This project is developed based on the latest **LangChain V1.0** ecosystem. Unli
 ## 📚 Documentation
 
 - [**Design Specification**](docs/design_specification.md): Understand the system's architectural design, technology selection, and core modules.
+- [**Setup Guide**](docs/setup_guide.md): Installation and configuration instructions for the project.
+
+## 📝 Related Blogs
+
+- [[Python Tutorial] Step-by-Step Guide to Replicate Deep Research Agent with LangGraph (with Source Code)](https://blog.csdn.net/roseey/article/details/155312929?spm=1001.2014.3001.5501)
+- [LangChain 1.0 is Finally Here! Why Am I Still Writing "Execution Layer" Middleware by Hand?](https://zhuanlan.zhihu.com/p/1977352285798552066)
+- [The Hardest Part of AI Agent Deployment: How to Make It "Listen" Without "Waiting Foolishly"?](https://zhuanlan.zhihu.com/p/1977405317177423051)
+- [What's Missing in LangChain 1.0? Write a Middleware from Scratch to Completely Bid Farewell to Agent "Black Box" Execution](https://juejin.cn/post/7576914798056718388)
+- [Saying Goodbye to "Black Box" Waiting: How to Gracefully Implement Frontend-Friendly Human-in-the-Loop in LangGraph](https://juejin.cn/post/7576969229984923688)
+
 
 ## 👀 Demo
 
