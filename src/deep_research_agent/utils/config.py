@@ -43,9 +43,6 @@ class Settings(BaseSettings):
     LANGFUSE_SECRET_KEY: Optional[str] = Field(None)
     LANGFUSE_HOST: Optional[str] = Field("https://cloud.langfuse.com")
     
-    # 数据库配置
-    POSTGRES_URL: str = Field("postgresql://localhost/deep_research")
-    REDIS_URL: str = Field("redis://localhost:6379")
     
     # 服务配置
     HOST: str = Field("0.0.0.0")
