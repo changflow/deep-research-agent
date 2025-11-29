@@ -1,6 +1,6 @@
 # Deep Research Agent - 安装与部署指南
 
-本指南将帮助你在本地环境搭建并运行 Deep Research Agent。
+本指南将帮助你在本地环境搭建并运行 Deep Research Agent.
 
 ## 环境要求
 
@@ -78,6 +78,31 @@ python -m uvicorn deep_research_agent.app:app --host 0.0.0.0 --port 8000 --reloa
 ```
 INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
 ```
+
+## 5.1 使用 Docker Compose 运行（推荐）
+
+为了简化部署过程，项目提供了 Docker Compose 配置，可以一键启动所有依赖服务。
+
+1. **构建并启动所有服务**:
+```bash
+docker compose up -d --build
+```
+
+2. **访问服务**:
+   - 前端界面: http://localhost:3000
+   - 后端 API: http://localhost:8000
+
+3. **查看日志**:
+```bash
+docker compose logs -f
+```
+
+1. **停止服务**:
+```bash
+docker compose down
+```
+
+如果修改了源代码，务必使用 `--build` 标志重新构建镜像以使更改生效。
 
 ## 6. 使用 Agent
 

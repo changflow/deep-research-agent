@@ -123,6 +123,31 @@ python -m deep_research_agent.app
 
 服务将在 `http://0.0.0.0:8000` 启动。
 
+### 使用 Docker Compose 运行
+
+另外，您也可以使用 Docker Compose 运行整个应用栈，其中包括后端服务以及前端界面。
+
+1. **构建并启动所有服务**:
+```bash
+docker compose up -d --build
+```
+
+1. **访问服务**:
+   - 前端界面: http://localhost:3000
+   - 后端 API: http://localhost:8000
+
+2. **查看日志**:
+```bash
+docker compose logs -f
+```
+
+1. **停止服务**:
+```bash
+docker compose down
+```
+
+如果您修改了源代码，请确保使用 `--build` 标志重新构建镜像以使更改生效。
+
 ### 使用示例
 
 1. **启动研究任务**:

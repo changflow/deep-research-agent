@@ -126,6 +126,31 @@ python -m deep_research_agent.app
 
 The service will start at `http://0.0.0.0:8000`.
 
+### Running with Docker Compose
+
+Alternatively, you can run the entire application stack using Docker Compose, which includes the backend service and the frontend interface.
+
+1. **Build and start all services**:
+```bash
+docker compose up -d --build
+```
+
+1. **Access the services**:
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:8000
+
+2. **View logs**:
+```bash
+docker compose logs -f
+```
+
+1. **Stop services**:
+```bash
+docker compose down
+```
+
+If you modify the source code, make sure to rebuild the images using the `--build` flag to apply your changes.
+
 ### Usage Example
 
 1. **Start a Research Task**:

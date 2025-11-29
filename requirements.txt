@@ -8,7 +8,6 @@ langchain
 langchain-core
 langchain-openai
 langfuse
-redis
 asyncpg
 tavily-python
 langchain_community
