@@ -71,7 +71,7 @@ graph TD
 
 ## 3. 核心特性演进 (Key Features Roadmap)
 
-我们将参考 Shannon 项目的优秀实践，逐步引入以下关键能力：
+我们将逐步引入以下关键能力：
 
 ### Phase 1: 核心拆分 (Refactoring)
 *   [ ] **Monorepo 迁移**: 建立 `libs/agent-core` 和 `agents/deep-research` 目录结构。
