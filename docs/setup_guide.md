@@ -1,12 +1,13 @@
 # Deep Research Agent - 安装与部署指南
 
-本指南将帮助你在本地环境搭建并运行 Deep Research Agent.
+本指南将帮助你在本地环境搭建并运行 Deep Research Agent。由于项目采用 Monorepo 结构，请仔细阅读路径配置部分。
 
 ## 环境要求
 
 *   **OS**: Windows, macOS, or Linux
-*   **Python**: = 3.13
+*   **Python**: >= 3.10
 *   **Git**
+*   **Docker & Docker Compose** (可选，用于容器化部署)
 
 ## 1. 克隆项目
 
@@ -15,7 +16,11 @@ git clone <repository-url>
 cd deep-research-agent
 ```
 
-## 2. 创建并激活虚拟环境
+## 2. 本地开发环境搭建 (Local Setup)
+
+如果你想进行代码开发和调试，请按照此步骤操作。
+
+### 2.1 创建虚拟环境
 
 **Windows (CMD/PowerShell):**
 ```cmd
@@ -29,87 +34,100 @@ python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-## 3. 安装依赖
+### 2.2 安装依赖
 
-我们使用 `pip` 安装核心依赖。
+由于采用 Monorepo 结构，必须先安装核心库 `agent-core`，再安装应用依赖。
 
 ```bash
-# 或者分别安装
-pip install fastapi uvicorn langchain-openai langgraph tavily-python python-dotenv langchain_community
+# 1. 以 Editable 模式安装核心库 (允许实时修改 libs 代码)
+pip install -e libs/agent-core
+
+# 2. 安装 Agent 具体依赖
+pip install -r agents/deep-research/requirements.txt
 ```
 
-## 4. 配置环境变量
+### 2.3 配置环境变量
 
-在项目根目录创建 `.env` 文件，并填入以下 API Keys：
+在 `agents/deep-research` 目录下复制示例配置并创建 `.env` 文件：
+
+```bash
+cp agents/deep-research/.env.example agents/deep-research/.env
+# Windows: copy agents\deep-research\.env.example agents\deep-research\.env
+```
+
+编辑 `agents/deep-research/.env`，填入 API Keys：
 
 ```ini
-# OpenAI Models (用于推理、规划和写作)
 OPENAI_API_KEY=sk-xxxxxxxxx
-OPENAI_BASE_URL=
-LLM_MODEL=
-# Tavily AI (用于网络搜索)
 TAVILY_API_KEY=tvly-xxxxxxxxx
-
-
-*   获取 **OpenAI API Key**: https://platform.openai.com/
-*   获取 **Tavily API Key** (免费 Tier 可用): https://tavily.com/
-
-## 5. 运行服务
-
-项目提供了便捷的启动脚本。
-
-**Windows:**
-双击运行 `run_server.bat`，或者在终端执行：
-```cmd
-run_server.bat
+# ...其他配置
 ```
 
-**通用方式 (Generic):**
-```bash
-# 设置 PYTHONPATH 包含 src 目录
-export PYTHONPATH=$PYTHONPATH:$(pwd)/src  # Linux/Mac
-set PYTHONPATH=%CD%\src                   # Windows CMD
+### 2.4 运行服务
 
-# 启动 Uvicorn Server
+为了确保 Python 能正确找到模块，设置 `PYTHONPATH` 并启动服务。
+
+**Windows CMD:**
+```cmd
+set PYTHONPATH=%CD%\agents\deep-research\src
 python -m uvicorn deep_research_agent.app:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-服务启动成功后，你会看到类似输出：
+**PowerShell:**
+```powershell
+$env:PYTHONPATH = "$PWD/agents/deep-research/src"
+python -m uvicorn deep_research_agent.app:app --host 0.0.0.0 --port 8000 --reload
 ```
-INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
-```
 
-## 5.1 使用 Docker Compose 运行（推荐）
-
-为了简化部署过程，项目提供了 Docker Compose 配置，可以一键启动所有依赖服务。
-
-1. **构建并启动所有服务**:
+**Linux / macOS:**
 ```bash
-docker compose up -d --build
+export PYTHONPATH=$(pwd)/agents/deep-research/src
+python -m uvicorn deep_research_agent.app:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-2. **访问服务**:
-   - 前端界面: http://localhost:3000
-   - 后端 API: http://localhost:8000
+服务启动后访问: [http://localhost:8000/docs](http://localhost:8000/docs)
 
-3. **查看日志**:
+---
+
+## 3. 使用 Docker Compose 部署 (推荐)
+
+这是最简单的运行方式，适合快速体验或生产部署。
+
+### 3.1 启动服务
+
+进入部署目录并启动：
+
 ```bash
-docker compose logs -f
-```
+# 进入部署目录
+cd deploy
 
-1. **停止服务**:
+# 启动 (自动构建镜像)
+docker-compose up -d --build
+```
+*Docker Compose 会自动读取 `../agents/deep-research/.env` 文件中的配置。*
+
+### 3.2 访问服务
+
+*   **API 文档**: [http://localhost:8000/docs](http://localhost:8000/docs)
+*   **前端界面**: [http://localhost:3000](http://localhost:3000) (如果启动了前端服务)
+
+### 3.3 管理容器
+
 ```bash
-docker compose down
+# 查看日志
+docker-compose logs -f
+
+# 停止服务
+docker-compose down
 ```
 
-如果修改了源代码，务必使用 `--build` 标志重新构建镜像以使更改生效。
+## 4. 常见问题 (FAQ)
 
-## 6. 使用 Agent
+**Q: 找不到 `agent_core` 模块？**
+A: 请确保你执行了 `pip install -e libs/agent-core`。
 
-1.  打开浏览器访问 **http://localhost:8000**。
-2.  在输入框中输入研究主题（例如：“量子计算机的最新商业化进展”）。
-3.  点击 **"Start Research"**。
-4.  Agent 会首先进行规划，生成步骤后会暂停等待你的审批。
-5.  在 "Research Plan" 区域查看计划，点击 **"Approve Plan"** (或提供修改建议后点击 **"Request Changes"**)。
-6.  Agent 开始自动执行搜索、阅读和整合信息。
-7.  完成后，页面会自动显示完整的 Markdown 报告，支持导出 PDF。
+**Q: Docker 启动失败，提示找不到文件？**
+A: 请确保你在 `deploy/` 目录下运行 `docker-compose` 命令，且根目录结构完整。
+
+**Q: 前端无法连接后端？**
+A: 检查 `.env` 中的 `NEXT_PUBLIC_API_URL` (如果是 Next.js) 或前端配置，确保指向 `http://localhost:8000`。

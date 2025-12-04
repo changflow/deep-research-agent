@@ -1,12 +1,30 @@
-# Deep Research Agent - 架构设计文档
+# AgentCore 架构设计文档
 
 ## 1. 系统概览
 
-Deep Research Agent 是一个基于 LangGraph 和 LLM 构建的自主智能研究助手。它能够接收用户的高级研究主题，自动进行任务拆解、信息检索、深度分析，并最终生成结构化的研究报告。系统融入了 Human-in-the-loop (HITL) 机制，允许用户在规划阶段进行干预和指导。
+本项目采用分层架构，由底层的通用框架 **AgentCore** 和上层的具体应用实现（如 **Deep Research Agent**）组成。
+
+*   **AgentCore Framework**: 提供构建可控、可观测智能体所需的基础设施。
+*   **Deep Research Agent**: 基于 AgentCore 构建的参考实现，专注于自主信息检索和报告生成。
 
 ## 2. 核心架构
 
-系统遵循模块化、解耦的设计原则，主要包含以下几层：
+系统遵循模块化、解耦的设计原则，并采用 Monorepo 结构来管理核心框架与具体应用。
+
+### 2.1 代码组织 (Code Organization)
+
+系统分为两大部分：
+
+1.  **Framework Core (`libs/agent-core`)**:
+    *   通用的 Agent 基础设施，与具体业务无关。
+    *   包含：Graph 状态机基类、中间件框架、Tool 接口、配置管理系统等。
+2.  **Agent Implementation (`agents/deep-research`)**:
+    *   具体的业务逻辑实现。
+    *   依赖于 `agent-core`，定义了具体的 Research Plan、Prompt Templates 和 Workflow Graph。
+
+### 2.2 系统分层
+
+主要包含以下几层：
 
 ```mermaid
 graph TD
@@ -14,7 +32,8 @@ graph TD
     Client[Web Frontend / API Client] --> API[FastAPI Server]
 
     %% === Agent Core ===
-    API --> Plan[Plan Generation]
+    API --> Graph[LangGraph Orchestrator]
+    Graph --> Plan[Plan Generation]
     Plan --> Human{Human Approval}
     Human -- "Approve" --> Exec[Execution Node]
     Human -- "Reject/Feedback" --> Plan
@@ -46,8 +65,8 @@ graph TD
     *   提供异步接口：启动任务、查询状态、提交反馈。
     *   管理 Agent 的生命周期和会话状态。
 
-3.  **Agent Core (Logic Layer)**:
-    *   基于 **LangGraph** 实现的状态机。
+3.  **Agent Core (Logic & Framework Layer)**:
+    *   基于 `libs/agent-core` 提供的基础能力，构建特定业务的 **LangGraph** 状态机。
     *   **Nodes**:
         *   `plan_node`: 负责理解用户意图，生成研究步骤。
         *   `research_node`: 循环执行，负责针对每个步骤进行搜索、网页抓取和信息提取。

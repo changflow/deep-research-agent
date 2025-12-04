@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agent-core"
+version = "0.1.0"
+description = "Core framework for Changflow AI Agents"
+requires-python = ">=3.10"
+dependencies = [
+    "langchain>=0.1.0",
+    "langgraph>=0.0.10",
+    "langfuse>=2.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "black",
+    "isort",
+]

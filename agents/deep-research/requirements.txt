@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+pydantic
+pydantic-settings
+python-dotenv
+langgraph
+langchain
+langchain-core
+langchain-openai
+langfuse
+asyncpg
+tavily-python
+langchain_community
+-e ../../libs/agent-core
