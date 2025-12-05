@@ -1,31 +1,37 @@
-# 002 - Next-Gen Architecture Blueprint: Intelligent Reasoning Framework
+# 002 - Architecture Blueprint: FractalMind (Next-Gen Reasoning Framework)
 
 **Status:** Draft
-**Date:** 2025-12-04
+**Date:** 2025-12-05
 **Audience:** Architects, Developers, System Integrators
 
 ## 1. 战略愿景 (Strategic Vision)
 
-本项目的目标是构建一个**具备深度推理能力与企业级治理特性的智能体框架**。
+本项目的目标是构建一个**通用的、具备深度推理能力与多场景适配性的智能体协作框架**。
 
-区别于传统的线性工作流（Chain-of-Thought），本框架采用**分形编排（Fractal Orchestration）**架构，通过递归式的任务分解与自我修正，实现对复杂问题的深度探究。同时，架构内置了**协议化互操作标准（MCP）**与**全链路可观测性治理**，确保系统在具备强认知能力的同时，依然保持可控、透明与安全。
+区别于传统的线性任务执行（Chain-of-Thought）或单一场景的垂直 Agent，FractalMind 采用**分形编排（Fractal Orchestration）**架构，通过**“动态分解 → 并行探索 → 证据验证 → 迭代修正”**的通用认知范式，解决具有高模糊性与多维度的复杂问题。这一范式不仅适用于深度研究，通过切换“策略配置”，它同样能胜任**复杂系统编程**、**创意内容创作**或**商业情报分析**等场景。
+
+同时，架构内置了**协议化互操作标准（MCP）**与**全链路可观测性治理**，确保这一强大的通用认知引擎时刻处于可控、透明与安全的状态。
 
 ## 2. 核心架构支柱 (Core Architectural Pillars)
 
 ### 2.1 分形认知编排系统 (Fractal Cognitive Orchestration)
-系统摒弃了单一 Agent 大包大揽的模式，采用 "Orchestrator-Workers" 的层级协作结构，模拟人类专家团队的研究方法。
+系统摒弃了单一 Agent “一把抓”的模式，构建了一个通用的 **Orchestrator-Workers** 协作网络。
 
-*   **Recursive Planning (递归规划)**: 主智能体 (Lead Orchestrator) 具备动态规划能力。它不直接执行任务，而是定义目标接口与验收标准，根据 Workers 返回的初步结果，实时调整后续的研究路径（Re-planning），避免无效路径依赖。
-*   **Specialized Executors (专业执行者)**:
-    *   **Research Worker**: 专注于广度信息检索与交叉验证。
-    *   **Data Analyst (Code Execution)**: 利用 MCP 连接安全沙箱，编写并执行 Python 代码来处理检索到的数据（如清洗 CSV、统计频次），而非依赖 LLM 进行不可靠的数值计算。
-    *   **Critic Worker**: 运行在独立沙箱中，负责对结论进行逻辑漏洞审查与事实核查 (Fact-Checking)。
+*   **Recursive Planning (通用递归规划)**:
+    主智能体 (Lead Orchestrator) 是一个通用的问题拆解引擎。它不直接执行具体工作，而是负责定义目标接口与验收标准，并根据“子任务”反馈的中间结果，实时动态调整后续的路径（Re-planning）。
+    *   **Safety Guards**: 为了确保这种强大的递归能力不失控，系统内置了 **Recursion Circuit Breaker**（递归熔断器），通过深度限制与循环检测机制，防止 Agent 陷入死循环。
+
+*   **Adaptive Worker System (场景自适应执行者)**:
+    Worker 并非硬编码的角色，而是根据场景（Domain）动态加载的**“能力角色包” (Persona Packs)**。
+    *   **Gatherer (信息获取者)**: 负责广度探索。在研究场景下是 *Research Worker*（查资料），在编程场景下则是 *Repo Scanner*（读代码）。
+    *   **Processor (逻辑处理者)**: 负责深度加工。在研究场景下是 *Data Analyst*（清洗数据），在编程场景下则是 *Code Implementer*（写函数）。均通过 MCP 连接安全沙箱进行确定性计算。
+    *   **Verifier (质量把关者)**: 负责证据验证。在研究场景下是 *Critic*（查来源），在编程场景下则是 *Test Runner*（跑测试）。
 
 ### 2.2 自适应上下文管理 (Adaptive Context Management)
 针对大模型固有的上下文窗口限制与 "Lost-in-the-Middle" 现象，引入**信息密度控制引擎**。
 
-*   **Knowledge Distillation (知识蒸馏)**: 在层级传递中，强制执行“信息压缩”。子任务完成时，通过 `Summarizer Node` 将冗余的思维链（Chain of Thought）提炼为高密度的知识块 (Knowledge Nuggets) 上报，确保上层决策者始终拥有清晰、专注的上下文视野。
-*   **Dynamic Loading (动态加载)**: 支持基于相关性的按需加载机制，仅将当前推理步骤最关心的事实调入显存，大幅提升推理精度与响应速度。
+*   **Knowledge Distillation (知识蒸馏)**: 在层级传递中，强制执行“信息压缩”。子任务完成时，通过 `Summarizer Node` 将冗余的思维链（Chain of Thought）提炼为高密度的知识块 (Knowledge Nuggets) 上报。
+*   **Dynamic Loading (动态加载)**: 并非一次性加载所有 Nuggets，而是为每个 Nugget 生成 **Vector Embedding**。在推理该步骤时，仅加载与当前 Thought 语义相似度 (Cosine Similarity) 最高的 Top-K Nuggets，实现“显存即缓存”的高效管理。
 
 ### 2.3 协议化互操作层 (Protocol-Agnostic Interoperability)
 全面采用 **Model Context Protocol (MCP)** 标准，实现工具层与核心逻辑的彻底解耦。
@@ -44,44 +50,27 @@
 
 本项目采用 **"MVP First"** 的迭代策略，在早期阶段**外包**非核心基础设施（如使用 Langfuse Cloud SaaS 和社区 MCP 工具），集中火力攻克**核心认知架构**。
 
-### Phase 1: 核心认知智能 (Core Intelligence) - Weeks 1-2
-**目标**: 构建 **Fractal Orchestrator** 能够完成复杂的递归搜索任务，暂不关注自定义工具与复杂治理。
-*   [ ] **Logic First**: 集中精力编写 `Orchestrator` 的 Prompt Engineering 和 `Graph` 的状态流转逻辑。
-*   [ ] **SaaS Observability**: 直接集成 **Langfuse Cloud** (Free Tier)，一行代码实现 Trace 和 Token 统计，跳过本地日志系统开发。
-*   [ ] **Community Tools**: 仅使用社区成熟的 MCP Server (如 `brave-search`, `filesystem`)，不编写任何自定义 Tool 代码。
+### Phase 1: 核心框架与 MVP 验证 (Core Framework & MVP)
+**目标**: 确立 **通用编排器 (Orchestrator)** 的核心逻辑，并以 **"深度研究"** 为首个参考实现（Reference Implementation）来验证架构基础。
+*   [ ] **Interface Definition (Level 1)**: 定义 `Gatherer` (信息采集) 和 `Verifier` (核心验证) 的基础接口标准。优先实现 `Research Worker` 和 `Critic` 作为首批实现类。
+*   [ ] **Orchestrator Logic**: 实现具备递归与熔断（Circuit Breaker）能力的通用编排引擎。
+*   [ ] **Dev Observability**: 集成 **Langfuse Cloud**，为每个 Worker 节点配置标准化的 Trace Span，用于调试。
+*   [ ] **Process Visualization**: 开发实时前端 UI，将分形编排的“递归思维树”可视化展示给最终用户。
 
-### Phase 2: 深度能力构建 (Deep Capabilities) - Weeks 3-4
-**目标**: 引入 **Code Execution** 与 **Context Distillation**，提升解决问题的深度。
-*   [ ] **Docker Sandbox**: 实现 `Data Analyst` 节点，基于 Docker 容器运行 Python 代码，替代 LLM 的数值计算。
-*   [ ] **Context Summarizer**: 实现“知识蒸馏”节点，在父子任务传递间压缩上下文。
-*   [ ] **MVP Release**: 此时可发布 v0.1.0 版本，具备完整的深度研究能力。
+### Phase 2: 架构解耦与能力深化 (Abstraction & Deepening)
+**目标**: 完成所有 Worker 角色的完全解耦，并引入深度计算能力。
+*   [ ] **Processor Abstraction**: 定义 `Processor` (逻辑处理) 的通用接口。实现 **"Universal Sandbox"** (基于 Docker) 作为其默认执行环境，支持代码执行与数据清洗。
+*   [ ] **Strategy Engine**: 完成策略配置化引擎，支持通过 YAML 动态组装 `Gatherer` / `Processor` / `Verifier` 的不同实现。
+*   [ ] **Dynamic Context**: 实现基于 Embedding 的动态上下文加载机制。
 
-### Phase 3: 企业级增强 (Enterprise Enhancement) - Future
-**目标**: 仅在需求明确时，投资开发自定义中间件与私有化工具。
-*   [ ] **Custom Tools**: 在 `servers/` 目录中开发专用的 MCP Server (如内部 API Connector)。
-*   [ ] **Middleware**: 替换 Langfuse Cloud 为私有化中间件，实现复杂的 Token 熔断策略。
-*   [ ] **MicroVM**: 升级 Docker Sandbox 为 Firecracker MicroVM 以满足多租户隔离需求。
+### Phase 3: 领域扩展与企业治理 (Domain Extension & Governance) - Future
+**目标**: 针对特定领域构建专用的基础设施，并增强治理能力。
+*   **Multi-Tenant Quota**: 实现按 Team/Project 粒度的 Token 配额管理策略。
+*   **MicroVM**: 升级 Docker Sandbox 为 Firecracker MicroVM 以满足多租户隔离需求。
+*   待续......
 
-## 4. 全局项目结构预览 (Project Structure Preview)
 
-采用 Monorepo 结构，其中 `servers/` 目录专门用于储备未来 Phase 3 需要的自定义 MCP 服务能力。
-
-```text
-changflow-root/
-├── libs/                 # 公共库层
-│   └── agent-core/       # 核心框架 (State, Orchestrator, Middleware)
-├── agents/               # 应用层 (Consumers of MCP)
-│   ├── deep-research/    # 深度研究智能体 (Python)
-│   └── ...
-├── servers/              # 协议层 (Providers of MCP) - [Phase 3 Focus]
-│   ├── knowledge-graph/  # [Custom] 知识图谱读写服务
-│   ├── local-analyzer/   # [Custom] 本地数据分析服务
-│   └── ...               # 其他自定义 MCP Server
-├── deploy/               # 部署层 (Docker Compose)
-└── docs/                 # 文档层
-```
-
-## 5. 总结
+## 4. 总结
 
 本项目旨在通过**分形编排**与**自适应上下文**技术突破现有 Agent 的能力天花板，同时通过**MCP 标准**与**治理中间件**确保系统的落地可行性与安全性。
 
