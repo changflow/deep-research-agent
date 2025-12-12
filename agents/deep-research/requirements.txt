@@ -11,4 +11,6 @@ langfuse
 asyncpg
 tavily-python
 langchain_community
+langchain-huggingface
+sentence-transformers
 -e ../../libs/agent-core

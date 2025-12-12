@@ -25,6 +25,8 @@ class ResearchStep(BaseModel):
     description: str
     keywords: List[str]
     expected_output: str
+    assigned_agent: str = "researcher"
+    depth: int = 1  # Recursion depth
     status: ResearchStepStatus = ResearchStepStatus.PENDING
     start_time: Optional[datetime] = None
     end_time: Optional[datetime] = None
@@ -78,6 +80,11 @@ class ExtractedInsight(BaseModel):
     content: str
     sources: List[str]
     confidence: float = 0.0
+    
+    # Adaptive Context Management fields
+    nuggets: List[str] = Field(default_factory=list) # Knowledge Nuggets (Dense facts)
+    embedding: Optional[List[float]] = None # Vector Embedding of the content/nuggets
+    
     extracted_at: datetime = Field(default_factory=datetime.now)
 
 class ResearchAgentState(BaseAgentState):
@@ -93,6 +100,10 @@ class ResearchAgentState(BaseAgentState):
     search_results: Dict[str, List[SearchResult]] = Field(default_factory=dict)
     extracted_insights: Dict[str, ExtractedInsight] = Field(default_factory=dict)
     
+    # Middleware buffers
+    context_buffer: Optional[str] = None
+    last_generated_insight: Optional[ExtractedInsight] = None
+    
     # Output
     final_report: Optional[str] = None
     
@@ -103,6 +114,7 @@ class ResearchAgentState(BaseAgentState):
     
     def add_insight(self, insight: ExtractedInsight) -> None:
         self.extracted_insights[insight.step_id] = insight
+        self.last_generated_insight = insight
     
     def get_current_step(self) -> Optional[ResearchStep]:
         if self.research_plan:
@@ -120,6 +132,13 @@ class ResearchAgentState(BaseAgentState):
         
     def complete_research(self) -> None:
         self.complete()
+
+    def insert_steps_after_current(self, new_steps: List[ResearchStep]) -> None:
+        """Dynamically insert new steps after current step (Recursive Planning)"""
+        if self.research_plan:
+            # Insert at current_index + 1
+            for i, step in enumerate(new_steps):
+                self.research_plan.steps.insert(self.current_step_index + 1 + i, step)
 
 # Factory functions
 
@@ -144,7 +163,7 @@ def create_research_state(
         session_id=session_id,
         config=config,
         user_id=user_id,
-        trace_id=f"research_{session_id}_{int(datetime.now().timestamp())}",
+        trace_id=None,
         search_results={},
         extracted_insights={}
     )

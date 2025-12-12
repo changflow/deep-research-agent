@@ -1,6 +1,8 @@
 @echo off
 cd /d "%~dp0"
 set PYTHONPATH=%~dp0src;%~dp0..\..\libs\agent-core\src
+set ENV_FILE=%~dp0\.env
+
 
 echo ===================================================
 echo   Deep Research Agent Backend
@@ -19,6 +21,10 @@ if exist "..\.venv\Scripts\activate.bat" (
 )
 
 echo.
+echo Installing/Updating dependencies...
+pip install -r requirements.txt
+echo.
+
 echo Starting Uvicorn server...
 echo Open your browser at: http://localhost:8000
 echo.

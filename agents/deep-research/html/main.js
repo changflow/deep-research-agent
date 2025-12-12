@@ -1,13 +1,12 @@
-const API_BASE_URL = 'http://localhost:8000'; // 假设后端运行在 8000 端口
+const API_BASE_URL = 'http://localhost:8000';
 let currentThreadId = null;
 let pollInterval = null;
 let previousStatus = null;
+let isRegeneratingPlan = false; // Flag to track plan regeneration after feedback
 
-// 配置 marked.js 以支持 TOC 跳转 (自动添加标题 ID) 和 链接新窗口打开
+// Configure marked.js
 const renderer = {
     heading(text, level) {
-        // 改进的 Slug 生成逻辑：模拟 GitHub/Python-Markdown 风格
-        // Primary ID: en-dash/em-dash -> hyphen
         const id = text
             .toLowerCase()
             .replace(/[\u2013\u2014]/g, '-') 
@@ -15,48 +14,7 @@ const renderer = {
             .replace(/[^\w\u4e00-\u9fa5\-]+/g, '')
             .replace(/\-\-+/g, '-')
             .replace(/^-+|-+$/g, '');
-        
-        // Alternative ID 1: Remove en-dash/em-dash (don't replace with hyphen)
-        const idNoDash = text
-            .toLowerCase()
-            .replace(/\s+/g, '-')
-            .replace(/[^\w\u4e00-\u9fa5\-]+/g, '') // Removes en-dash/em-dash
-            .replace(/\-\-+/g, '-')
-            .replace(/^-+|-+$/g, '');
-
-        // Alternative ID 2: Keep en-dash/em-dash
-        const idKeepDash = text
-            .toLowerCase()
-            .replace(/\s+/g, '-')
-            .replace(/[^\w\u4e00-\u9fa5\-\u2013\u2014]+/g, '') // Keeps en-dash/em-dash
-            .replace(/\-\-+/g, '-')
-            .replace(/^-+|-+$/g, '');
-
-        // Alternative ID 3: Keep parenthesis (full-width and half-width)
-        const idKeepParen = text
-            .toLowerCase()
-            .replace(/[\u2013\u2014]/g, '-') 
-            .replace(/\s+/g, '-')
-            .replace(/[^\w\u4e00-\u9fa5\-\(\)（）]+/g, '') // Keep parenthesis
-            .replace(/\-\-+/g, '-')
-            .replace(/^-+|-+$/g, '');
-
-        // Alternative ID 4: Keep parenthesis AND en-dash
-        const idKeepAll = text
-            .toLowerCase()
-            .replace(/\s+/g, '-')
-            .replace(/[^\w\u4e00-\u9fa5\-\(\)（）\u2013\u2014]+/g, '') 
-            .replace(/\-\-+/g, '-')
-            .replace(/^-+|-+$/g, '');
-
-        // Generate hidden anchors for compatibility
-        let anchors = '';
-        if (idNoDash !== id) anchors += `<a id="${idNoDash}" class="anchor-offset"></a>`;
-        if (idKeepDash !== id && idKeepDash !== idNoDash) anchors += `<a id="${idKeepDash}" class="anchor-offset"></a>`;
-        if (idKeepParen !== id && idKeepParen !== idNoDash && idKeepParen !== idKeepDash) anchors += `<a id="${idKeepParen}" class="anchor-offset"></a>`;
-        if (idKeepAll !== id && idKeepAll !== idNoDash && idKeepAll !== idKeepDash && idKeepAll !== idKeepParen) anchors += `<a id="${idKeepAll}" class="anchor-offset"></a>`;
-            
-        return `<h${level} id="${id}">${anchors}${text}</h${level}>`;
+        return `<h${level} id="${id}">${text}</h${level}>`;
     },
     link(href, title, text) {
         const isInternal = href && href.startsWith('#');
@@ -65,25 +23,36 @@ const renderer = {
     }
 };
 
-// 检查 marked 版本兼容性
-if (typeof marked.use === 'function') {
+if (typeof marked !== 'undefined' && typeof marked.use === 'function') {
     marked.use({ renderer });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Helper to safely add listener
     const addListener = (id, event, handler) => {
         const el = document.getElementById(id);
         if (el) el.addEventListener(event, handler);
     };
 
-    // Event Listeners
     addListener('start-btn', 'click', startResearch);
     addListener('approve-plan-btn', 'click', () => submitFeedback(true));
     addListener('reject-plan-btn', 'click', toggleFeedbackInput);
     addListener('submit-feedback-btn', 'click', () => submitFeedback(false));
     addListener('download-pdf-btn', 'click', downloadPDF);
+    addListener('toggle-mindmap-btn', 'click', toggleMindMap);
 });
+
+function toggleMindMap() {
+    console.log("Toggle MindMap clicked");
+    const container = document.getElementById('mind-map-container');
+    const btn = document.getElementById('toggle-mindmap-btn');
+    if (!container || !btn) {
+        console.error("Missing elements for toggle");
+        return;
+    }
+    container.classList.toggle('collapsed');
+    const isCollapsed = container.classList.contains('collapsed');
+    btn.textContent = isCollapsed ? '展开 v' : '收起 ^';
+}
 
 async function startResearch() {
     const query = document.getElementById('query').value.trim();
@@ -94,21 +63,16 @@ async function startResearch() {
         return;
     }
 
-    // UI Update
     document.getElementById('input-section').classList.add('hidden');
     document.getElementById('status-section').classList.remove('hidden');
     addLog('正在初始化研究 Agent...');
 
     try {
-        // Update endpoint path and ensure payload structure matches backend ResearchRequest
         const response = await fetch(`${API_BASE_URL}/research`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 query: query,
-                // Assuming backend allows flexible config or ignores extras
-                // We can map max_steps to config if supported, but for now keeping simple
-                // Or if we want to be strict:
                 config: {
                     require_plan_approval: true,
                     max_search_iterations: maxSteps || 5
@@ -129,21 +93,15 @@ async function startResearch() {
     } catch (error) {
         console.error(error);
         addLog(`错误: 无法启动研究任务 - ${error.message}`, 'error');
-        alert(`启动失败: ${error.message}\n请检查后端服务是否运行，以及是否配置了正确的 API Key`);
+        alert(`启动失败: ${error.message}`);
         document.getElementById('input-section').classList.remove('hidden');
         document.getElementById('status-section').classList.add('hidden');
     }
 }
 
 function startPolling() {
-    if (pollInterval) {
-        clearInterval(pollInterval);
-    }
-    
-    // 使用标准函数表达式以避免可能的解析问题
-    pollInterval = setInterval(function() {
-        checkStatus();
-    }, 2000);
+    if (pollInterval) clearInterval(pollInterval);
+    pollInterval = setInterval(checkStatus, 2000);
 }
 
 async function checkStatus() {
@@ -158,7 +116,6 @@ async function checkStatus() {
 
     } catch (error) {
         console.error('Polling error', error);
-        // Don't stop polling immediately on one error, but maybe log it
     }
 }
 
@@ -175,7 +132,6 @@ function updateStatusDisplay(state) {
         previousStatus = state.status;
     }
 
-    // Progress logic (simplified)
     progressContainer.classList.remove('hidden');
     
     let progress = 0;
@@ -183,11 +139,10 @@ function updateStatusDisplay(state) {
     else if (state.status === 'plan_review') progress = 20;
     else if (state.status === 'executing') {
         progress = 30;
-        // If we have step info
         if (state.research_plan && state.research_plan.steps) {
             const total = state.research_plan.steps.length;
             const current = state.extracted_insights ? Object.keys(state.extracted_insights).length : 0;
-            const stepProgress = (current / total) * 60; // 30% -> 90%
+            const stepProgress = total > 0 ? (current / total) * 60 : 0;
             progress = 30 + stepProgress;
         }
     }
@@ -197,89 +152,137 @@ function updateStatusDisplay(state) {
 }
 
 function handleStateLogic(state) {
-    // Handle Plan Approval
-    if (state.status === 'plan_review' && state.waiting_for_approval) {
-        document.getElementById('plan-section').classList.remove('hidden');
+    // 1. Update MindMap Data First (DOM content only)
+    updateMindMap(state);
+
+    const planSection = document.getElementById('plan-section');
+    const vizSection = document.getElementById('visualization-section');
+    const reportSection = document.getElementById('report-section');
+
+    const isPlanReview = (state.status || '').toLowerCase() === 'plan_review';
+    const isPending = state.status === 'pending';
+    const isExecuting = (state.status || '').toLowerCase() === 'executing';
+    const hasPlan = !!state.research_plan;
+    // Check waiting_for_approval if the backend provides it, otherwise assume true if in plan_review
+    const isWaitingApproval = state.waiting_for_approval !== false; 
+
+    // Clear regeneration flag if we enter plan_review (new plan ready) or executing (approved)
+    if (isPlanReview || isExecuting) {
+        isRegeneratingPlan = false;
+    }
+
+    // 2. Handle Plan Approval Section UI
+    // Only show approval UI if in plan_review AND waiting for approval
+    // Critical: If regenerating, do NOT show approval UI even if status says plan_review (prevents race conditions)
+    const showPlanApproval = isPlanReview && isWaitingApproval && !isRegeneratingPlan;
+    
+    // Manage Plan Section Visibility
+    if (showPlanApproval) {
+        planSection.classList.remove('hidden');
         
-        // Render Plan
+        // Ensure approval elements are visible (in case they were hidden during regeneration)
+        const noticeEl = planSection.querySelector('.notice');
+        const actionsEl = planSection.querySelector('.actions');
+        if (noticeEl) noticeEl.classList.remove('hidden');
+        if (actionsEl) actionsEl.classList.remove('hidden');
+        
+        // Render Plan Content
         const planContentDiv = document.getElementById('plan-content');
-        
         if (state.research_plan) {
-            // Debug Log
             if (!planContentDiv.hasAttribute('data-rendered')) {
-                 console.log("Rendering plan:", state.research_plan);
                  const stepCount = state.research_plan.steps ? state.research_plan.steps.length : 0;
-                 addLog(`收到研究计划: ${stepCount} 个步骤`);
+                 addLog(`收到研究计划: ${stepCount} 个步骤，等待审批`);
                  planContentDiv.setAttribute('data-rendered', 'true');
             }
-
-            // Manual HTML Construction to avoid Markdown/CDN dependencies
-            let planHtml = "";
-            try {
-                planHtml += `<div class="mb-3"><strong>🎯 研究目标:</strong> ${state.research_plan.objective || '无目标'}</div>`;
-                
-                const steps = Array.isArray(state.research_plan.steps) ? state.research_plan.steps : [];
-                if (steps.length === 0) {
-                     planHtml += `<div class="alert alert-warning">注意：计划中没有步骤数据。</div>`;
-                     planHtml += `<pre class="small text-muted">${JSON.stringify(state.research_plan, null, 2)}</pre>`;
-                } else {
-                    planHtml += `<div class="steps-list">`;
-                    steps.forEach((s, i) => {
-                         planHtml += `
-                            <div class="step-item p-2 border-bottom">
-                                <div class="fw-bold">步骤 ${i+1}: ${s.title || 'Untitled'}</div>
-                                <div class="text-muted small">${s.description || ''}</div>
-                                ${s.expected_output ? `<div class="text-info x-small">Expected: ${s.expected_output}</div>` : ''}
-                            </div>
-                         `;
-                    });
-                    planHtml += `</div>`;
-                    planHtml += `<div class="mt-3 text-muted small">Estimated duration: ${state.research_plan.estimated_duration_minutes || '?'} mins</div>`;
-                }
-            } catch (e) {
-                console.error("Error constructing plan HTML:", e);
-                planHtml = `<div class="text-danger">Error render plan: ${e.message}</div>`;
-            }
-
-            planContentDiv.innerHTML = planHtml;
-        } else {
-            planContentDiv.innerHTML = `<div class="notice error">
-                未找到研究计划数据 (research_plan is null)。<br>
-                请检查后端日志。
-                <br>State Dump: <pre>${JSON.stringify(state, null, 2)}</pre>
-            </div>`;
+            renderPlanContent(state.research_plan, planContentDiv);
+            
+            // Clear any loading state message if it exists
+            const existingMsg = document.getElementById('plan-regen-msg');
+            if (existingMsg) existingMsg.remove();
         }
+    } else if (isRegeneratingPlan) {
+        // KEEP plan section visible but show loading message
+        // HIDE approval buttons and notice as requested by user
+        
+        planSection.classList.remove('hidden');
+        
+        const noticeEl = planSection.querySelector('.notice');
+        const actionsEl = planSection.querySelector('.actions');
+        if (noticeEl) noticeEl.classList.add('hidden');
+        if (actionsEl) actionsEl.classList.add('hidden');
+
+        const planContentDiv = document.getElementById('plan-content');
+        planContentDiv.innerHTML = '<div id="plan-regen-msg" class="alert alert-info">🔄 正在根据您的反馈重新生成计划，请稍候...</div>';
     } else {
-        document.getElementById('plan-section').classList.add('hidden');
-        // Clear rendered flag when hidden
+        planSection.classList.add('hidden');
         const planContentDiv = document.getElementById('plan-content');
         if(planContentDiv) planContentDiv.removeAttribute('data-rendered');
     }
 
-    // Handle Final Report
+    // 3. Handle Visualization Section Visibility
+    // User Requirement: "由于 plan_review 状态下要先审批，所以思维过程在这个阶段不应展示，确认后再展示"
+    // New Requirement: Also hide when regenerating plan to avoid showing old plan data.
+    // Logic: Show visualization if we have a plan, NOT pending, NOT showing approval section, AND NOT regenerating.
+    // Update: Also hide if status is 'planning' (prevent showing old map during regeneration)
+    const isPlanning = (state.status || '').toLowerCase() === 'planning';
+    const shouldShowVisualization = hasPlan && !isPending && !showPlanApproval && !isRegeneratingPlan && !isPlanning;
+
+    if (shouldShowVisualization) {
+        vizSection.classList.remove('hidden');
+    } else {
+        vizSection.classList.add('hidden');
+    }
+
+    // 4. Handle Final Report
     if (state.status === 'completed' && state.final_report) {
         if (pollInterval) clearInterval(pollInterval);
-        document.getElementById('report-section').classList.remove('hidden');
-        
-        // Use marked for report as it is pure markdown
-        try {
-            console.log("Rendering report, length:", state.final_report.length);
-            if (typeof marked !== 'undefined' && typeof marked.parse === 'function') {
-                 document.getElementById('report-content').innerHTML = marked.parse(state.final_report);
-            } else if (typeof marked === 'function') {
-                 // Fallback for older marked versions
-                 document.getElementById('report-content').innerHTML = marked(state.final_report);
-            } else {
-                 // Fallback if marked is not loaded
-                 addLog("Warning: marked.js not loaded, showing raw text", "warning");
-                 document.getElementById('report-content').textContent = state.final_report;
-            }
-            addLog('✅ 研究任务完成！');
-        } catch (e) {
-            console.error("Error rendering report:", e);
-            addLog(`Error rendering report: ${e.message}`, 'error');
-            document.getElementById('report-content').textContent = state.final_report;
+        reportSection.classList.remove('hidden');
+        renderReport(state.final_report);
+        addLog('✅ 研究任务完成！');
+    }
+}
+
+function renderPlanContent(plan, container) {
+    let html = "";
+    try {
+        html += `<div class="mb-3"><strong>🎯 研究目标:</strong> ${plan.objective || '无目标'}</div>`;
+        const steps = Array.isArray(plan.steps) ? plan.steps : [];
+        if (steps.length === 0) {
+             html += `<div class="alert alert-warning">注意：计划中没有步骤数据。</div>`;
+        } else {
+            html += `<div class="steps-list">`;
+            steps.forEach((s, i) => {
+                 html += `
+                    <div class="step-item p-2 border-bottom">
+                        <div class="fw-bold">步骤 ${i+1}: ${s.title || 'Untitled'}</div>
+                        <div class="text-muted small">${s.description || ''}</div>
+                        ${s.expected_output ? `<div class="text-info x-small">Expected: ${s.expected_output}</div>` : ''}
+                    </div>
+                 `;
+            });
+            html += `</div>`;
+            html += `<div class="mt-3 text-muted small">预计耗时: ${plan.estimated_duration_minutes || '?'} 分钟</div>`;
         }
+    } catch (e) {
+        console.error("Error constructing plan HTML:", e);
+        html = `<div class="text-danger">渲染计划出错: ${e.message}</div>`;
+    }
+    container.innerHTML = html;
+}
+
+function renderReport(markdownText) {
+    const container = document.getElementById('report-content');
+    try {
+        if (typeof marked !== 'undefined' && typeof marked.parse === 'function') {
+             container.innerHTML = marked.parse(markdownText);
+        } else if (typeof marked === 'function') {
+             container.innerHTML = marked(markdownText);
+        } else {
+             container.textContent = markdownText;
+        }
+    } catch (e) {
+        console.error("Error rendering report:", e);
+        container.textContent = markdownText;
     }
 }
 
@@ -292,6 +295,31 @@ async function submitFeedback(isApproved) {
     
     try {
         addLog('正在提交反馈...');
+        
+        // Optimize UX: If modifying, set flag immediately to prevent old UI flash
+        if (!isApproved) {
+            isRegeneratingPlan = true;
+            const planSection = document.getElementById('plan-section');
+            if (planSection) {
+                 // Hide notice and actions immediately
+                const noticeEl = planSection.querySelector('.notice');
+                const actionsEl = planSection.querySelector('.actions');
+                if (noticeEl) noticeEl.classList.add('hidden');
+                if (actionsEl) actionsEl.classList.add('hidden');
+            }
+
+            // Clear current plan display immediately and show loading
+            const planContentDiv = document.getElementById('plan-content');
+            if (planContentDiv) {
+                planContentDiv.innerHTML = '<div class="alert alert-info">🔄 正在根据您的反馈重新生成计划，请稍候...</div>';
+            }
+            // Hide visualize section immediately via DOM (will be reinforced by handleStateLogic)
+            document.getElementById('visualization-section').classList.add('hidden');
+            
+            // Hide feedback input area
+             document.getElementById('feedback-input').classList.add('hidden');
+        }
+
         const response = await fetch(`${API_BASE_URL}/research/${currentThreadId}/feedback`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -306,15 +334,57 @@ async function submitFeedback(isApproved) {
         
         if (response.ok) {
             addLog('反馈提交成功，继续运行...');
-            document.getElementById('plan-section').classList.add('hidden');
-            // Status will update on next poll
+            // Logic handled by isRegeneratingPlan and handleStateLogic now
+            if (isApproved) {
+                document.getElementById('plan-section').classList.add('hidden');
+            }
+            // Reset status tracking so polling updates state
+            previousStatus = null;
         } else {
             addLog('反馈提交失败', 'error');
+            isRegeneratingPlan = false; // Revert if failed
         }
     } catch (e) {
         console.error(e);
         addLog('反馈提交错误', 'error');
+        isRegeneratingPlan = false; // Revert if failed
     }
+}
+
+function updateMindMap(state) {
+    const container = document.getElementById('mind-map-container');
+    if (!state.research_plan || !state.research_plan.steps) return;
+
+    let html = `<div class="tree-root"><span class="node-root">🎯 ${state.research_plan.objective || 'Research Goal'}</span>`;
+    html += '<ul class="tree-branch" style="list-style: none; padding-left: 0;">';
+    
+    state.research_plan.steps.forEach((step, index) => {
+        const isCurrent = (index === state.current_step_index);
+        let statusIcon = '⏳';
+        if (step.status === 'completed') statusIcon = '✅';
+        else if (step.status === 'failed') statusIcon = '❌';
+        else if (isCurrent) statusIcon = '🔄';
+
+        const activeClass = isCurrent ? 'node-active' : '';
+        const depth = step.depth || 1;
+        const indent = (depth - 1) * 20;
+        
+        html += `<li class="tree-item" style="margin-left: ${indent}px; border-left: ${depth > 1 ? '1px dashed #ccc' : 'none'};">
+            <div class="node-step ${activeClass}" style="padding: 5px; margin-bottom: 5px; border: 1px solid #eee; border-radius: 4px;">
+                <div style="display: flex; align-items: center;">
+                    <span class="step-status" style="margin-right: 5px;">${statusIcon}</span>
+                    <span class="step-title" style="font-weight: bold;">${step.title}</span>
+                    <span class="badge" style="font-size: 0.7em; margin-left: auto; background: #f0f0f0;">Depth ${depth}</span>
+                </div>
+                ${step.description ? `<div class="step-desc" style="font-size: 0.9em; color: #666; margin-left: 20px;">${step.description}</div>` : ''}
+                ${step.assigned_agent ? `<div class="step-agent" style="font-size: 0.8em; color: #888; margin-left: 20px;">🤖 ${step.assigned_agent}</div>` : ''}
+                ${step.status === 'failed' && step.error_message ? `<div class="step-error" style="font-size: 0.8em; color: #dc2626; margin-top: 5px; margin-left: 20px; background: #fee2e2; padding: 4px; border-radius: 4px;">⚠️ ${step.error_message}</div>` : ''}
+            </div>
+        </li>`;
+    });
+    
+    html += '</ul></div>';
+    container.innerHTML = html;
 }
 
 function addLog(message, type = 'info') {
@@ -333,63 +403,35 @@ function downloadPDF() {
         alert('没有可下载的报告内容');
         return;
     }
-
     addLog('正在准备 PDF 生成...');
-
-    // Create a clone of the element to avoid messing with the live view
-    // and to ensure we can control the rendering environment completely
     const clone = originalElement.cloneNode(true);
-    
-    // Create a container for the clone
     const container = document.createElement('div');
-    container.style.position = 'fixed'; // Use fixed to ensure it's relative to viewport but hidden
-    container.style.left = '-10000px'; // Move far left instead of top
+    container.style.position = 'fixed';
+    container.style.left = '-10000px';
     container.style.top = '0';
-    container.style.width = '800px'; // Slightly wider to accommodate margins
+    container.style.width = '800px';
     container.style.backgroundColor = 'white';
     container.style.zIndex = '-9999';
-    
-    // Apply the export class to the clone
     clone.classList.add('pdf-export-mode');
-    
-    // Ensure clone is visible and has auto height
-    clone.style.width = '100%'; // Fill container
+    clone.style.width = '100%';
     clone.style.height = 'auto';
     clone.style.overflow = 'visible';
     clone.style.maxHeight = 'none';
 
-    // Add padding buffer to clone to prevent bottom cut-off
     const paddingDiv = document.createElement('div');
     paddingDiv.style.height = '50px';
     paddingDiv.style.clear = 'both';
     clone.appendChild(paddingDiv);
-
     container.appendChild(clone);
     document.body.appendChild(container);
 
-    // Wait a brief moment for layout to settle
     setTimeout(() => {
-        // Debug: Check width
-        console.log('PDF Container Width:', container.offsetWidth);
-        console.log('PDF Clone Width:', clone.offsetWidth);
-
         const opt = {
-            margin:       [10, 10, 10, 10], // Top, Right, Bottom, Left
+            margin:       [10, 10, 10, 10], 
             filename:     `Research_Report_${currentThreadId || 'doc'}.pdf`,
             image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { 
-                scale: 2, 
-                useCORS: true, 
-                letterRendering: true,
-                width: 800, // Explicitly set width
-                windowWidth: 800, // Match container width
-                scrollY: 0,
-                x: 0,
-                y: 0
-            },
+            html2canvas:  { scale: 2, useCORS: true, letterRendering: true, width: 800, windowWidth: 800, scrollY: 0, x: 0, y: 0 },
             jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
-            // 'avoid-all' can cause large gaps if elements are long. 
-            // Using 'css' allows us to control breaks via classes like .page-break-inside-avoid
             pagebreak:    { mode: ['css', 'legacy'] } 
         };
 
@@ -404,7 +446,7 @@ function downloadPDF() {
                 document.body.removeChild(container);
             });
         } else {
-            alert('PDF 生成库未加载，请检查网络连接');
+            alert('PDF 生成库未加载');
             document.body.removeChild(container);
         }
     }, 100);

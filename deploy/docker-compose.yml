@@ -8,13 +8,8 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - OPENAI_BASE_URL=${OPENAI_BASE_URL}
-      - LLM_MODEL=${LLM_MODEL:-gpt-4o}
-      - TAVILY_API_KEY=${TAVILY_API_KEY}
-      - LANGFUSE_PUBLIC_KEY=${LANGFUSE_PUBLIC_KEY}
-      - LANGFUSE_SECRET_KEY=${LANGFUSE_SECRET_KEY}
-      - LANGFUSE_HOST=${LANGFUSE_HOST}
+      # 包含 agent-core 源码路径以支持 libs 的热重载 (配合 volumes 挂载)
+      - PYTHONPATH=/app/agents/deep-research/src:/app/libs/agent-core/src
     env_file:
       - ../agents/deep-research/.env
     volumes:
@@ -33,4 +28,6 @@ services:
       - "3000:80"
     depends_on:
       - deep-research-agent
+    volumes:
+      - ../agents/deep-research/html:/usr/share/nginx/html
     restart: unless-stopped

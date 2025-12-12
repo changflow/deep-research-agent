@@ -65,6 +65,11 @@ class BaseAgentState(BaseModel):
     error_message: Optional[str] = None
     retry_count: int = 0
     
+    # === 递归控制 ===
+    recursion_depth: int = 0
+    max_recursion_depth: int = 5  # 默认最大递归深度
+    visited_states: List[str] = Field(default_factory=list) # 用于循环检测
+
     # === 人工交互 ===
     human_feedback: Optional[Dict[str, Any]] = None
     pending_hitl_event: Optional[HITLEvent] = None

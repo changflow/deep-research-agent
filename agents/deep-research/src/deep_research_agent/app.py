@@ -6,6 +6,7 @@ FastAPI 应用程序入口
 import logging
 from typing import Dict, Any, Optional
 import os
+from logging import Formatter
 from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -29,28 +30,47 @@ from deep_research_agent.state import create_research_state, ResearchConfig, Age
 from .graph import agent_app
 from agent_core.utils.config import get_settings
 from agent_core.core.hitl import hitl_manager
+from agent_core.middleware.base import register_global_middleware
 from agent_core.middleware.implementations import (
-    LoggingMiddleware, 
-    TracingMiddleware, 
-    ErrorHandlerMiddleware,
-    PerformanceMiddleware,
-    register_global_middlewares
+    LoggingMiddleware,
+    ErrorHandlerMiddleware
 )
 
-# 初始化日志
-logging.basicConfig(level=logging.INFO)
+LOG_FORMAT = "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
+DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
+
+
+def configure_logging() -> None:
+    """Ensure console logs always include timestamps when run under Uvicorn."""
+    formatter = Formatter(LOG_FORMAT, DATE_FORMAT)
+    root_logger = logging.getLogger()
+
+    if not root_logger.handlers:
+        handler = logging.StreamHandler()
+        handler.setFormatter(formatter)
+        root_logger.addHandler(handler)
+    else:
+        for handler in root_logger.handlers:
+            handler.setFormatter(formatter)
+
+    root_logger.setLevel(logging.INFO)
+
+    for name in ("uvicorn", "uvicorn.error"):
+        named_logger = logging.getLogger(name)
+        for handler in named_logger.handlers:
+            handler.setFormatter(formatter)
+
+
+configure_logging()
 logger = logging.getLogger(__name__)
 
 # 获取配置
 settings = get_settings()
 
 # 注册全局中间件
-register_global_middlewares([
-    LoggingMiddleware(),
-    TracingMiddleware(),
-    ErrorHandlerMiddleware(),
-    PerformanceMiddleware()
-])
+# 注意：Graph 构建时也会注册一些中间件，这里主要注册通用的
+register_global_middleware(LoggingMiddleware())
+register_global_middleware(ErrorHandlerMiddleware())
 
 # 创建 FastAPI 应用
 app = FastAPI(
@@ -105,7 +125,8 @@ async def run_agent_background(session_id: str, state_dict: Dict[str, Any]):
     try:
         # 这里的 state_dict 只是初始状态，LangGraph 会处理状态流转
         # config 参数用于 checkpointer 配置
-        config = {"configurable": {"thread_id": session_id}}
+        # Increase recursion_limit to allow for longer research plans
+        config = {"configurable": {"thread_id": session_id}, "recursion_limit": 100}
         
         # 运行图直到结束或中断
         async for event in agent_app.astream(state_dict, config=config):
@@ -286,10 +307,27 @@ async def submit_feedback(session_id: str, request: FeedbackRequest):
         if action == "approve":
             new_state["status"] = AgentStatus.EXECUTING
         elif action == "modify":
-             # 对于 modify，我们也继续执行，并重置步骤索引
-             new_state["status"] = AgentStatus.EXECUTING
+             # 对于 modify，我们需要回到规划阶段重新生成计划
+             new_state["status"] = AgentStatus.PLANNING
              new_state["current_step_index"] = 0
-             # 注意：实际修改计划的逻辑比较复杂，这里暂不深入实现仅记录反馈
+             
+             # 提取修改意见并记录到 research_plan 中
+             notes = request.feedback.get("notes")
+             plan = new_state.get("research_plan")
+             if plan:
+                 if isinstance(plan, dict):
+                     plan["modification_notes"] = notes
+                 else:
+                     # It's a Pydantic object
+                     # Check if we can assign attribute (mutable)
+                     try:
+                        plan.modification_notes = notes
+                     except TypeError:
+                        # If immutable (frozen), we might need to replace the object
+                        # But ResearchPlan is likely not frozen
+                        pass
+                 
+                 logger.info(f"Set plan modification notes: {notes}")
         elif action == "reject":
             new_state["status"] = AgentStatus.ERROR
             new_state["error_message"] = "Rejected by user"
@@ -314,8 +352,18 @@ async def submit_feedback(session_id: str, request: FeedbackRequest):
 
 async def _resume_graph(config):
     """辅助函数：恢复图执行"""
-    async for event in agent_app.astream(None, config=config):
-        pass
+    try:
+        logger.info(f"Resuming graph execution with config: {config}")
+        # Ensure recursion limit is set in config if missing
+        if "recursion_limit" not in config:
+            config["recursion_limit"] = 100
+            
+        async for event in agent_app.astream(None, config=config):
+            # logger.info(f"Graph event: {event}")
+            pass
+        logger.info("Graph execution finished successfully")
+    except Exception as e:
+        logger.error(f"Error resuming graph execution: {e}", exc_info=True)
 
 
 @app.get("/health")
@@ -327,12 +375,12 @@ async def shutdown_event():
     """应用关闭时的清理工作"""
     logger.info("Shutting down application...")
     
-    # 查找并刷新 TracingMiddleware
+    # 查找并刷新 LangfuseMiddleware (如果需要)
     from agent_core.middleware.base import middleware_manager
     for middleware in middleware_manager.middlewares:
-        if isinstance(middleware, TracingMiddleware):
-            logger.info("Flushing tracing data...")
-            middleware.flush()
+        if isinstance(middleware, LangfuseMiddleware):
+            # Langfuse SDK 通常会自动处理 flush，但这里保留钩子
+            pass
 
 # === 静态文件挂载 (放在最后) ===
 # 获取 html 目录的绝对路径

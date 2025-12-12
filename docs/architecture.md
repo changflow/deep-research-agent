@@ -132,6 +132,7 @@ graph TD
 ## 5. 可扩展性设计
 
 *   **Middleware 模式**: 可以在 Graph 中插入 Middleware 节点（如 Token 计数、安全过滤器）。
+*   **Context Management**: 内置上下文管理中间件，支持自动 Embedding 检索以增强长周期任务的一致性，且可配置开启/关闭以优化性能。
 *   **Tool 抽象**: 搜索工具被封装，未来可轻松替换为 Google Search 或 Bing Search。
 *   **Model Agnostic**: 通过 LangChain，只需修改环境变量即可切换到底层 LLM (如 Claude 3, Llama 3)。
 *   **Docker Ready**: 项目结构标准，易于容器化部署。

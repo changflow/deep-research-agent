@@ -60,6 +60,10 @@ cp agents/deep-research/.env.example agents/deep-research/.env
 ```ini
 OPENAI_API_KEY=sk-xxxxxxxxx
 TAVILY_API_KEY=tvly-xxxxxxxxx
+
+# 系统优化配置
+# ENABLE_AUTO_CONTEXT: 是否开启自动上下文嵌入 (默认为 false 以优化速度，开启需配置 Embedding 模型)
+ENABLE_AUTO_CONTEXT=false
 # ...其他配置
 ```
 

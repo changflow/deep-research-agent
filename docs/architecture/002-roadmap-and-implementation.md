@@ -52,10 +52,10 @@
 
 ### Phase 1: 核心框架与 MVP 验证 (Core Framework & MVP)
 **目标**: 确立 **通用编排器 (Orchestrator)** 的核心逻辑，并以 **"深度研究"** 为首个参考实现（Reference Implementation）来验证架构基础。
-*   [ ] **Interface Definition (Level 1)**: 定义 `Gatherer` (信息采集) 和 `Verifier` (核心验证) 的基础接口标准。优先实现 `Research Worker` 和 `Critic` 作为首批实现类。
-*   [ ] **Orchestrator Logic**: 实现具备递归与熔断（Circuit Breaker）能力的通用编排引擎。
-*   [ ] **Dev Observability**: 集成 **Langfuse Cloud**，为每个 Worker 节点配置标准化的 Trace Span，用于调试。
-*   [ ] **Process Visualization**: 开发实时前端 UI，将分形编排的“递归思维树”可视化展示给最终用户。
+*   [x] **Interface Definition (Level 1)**: 定义 `Gatherer` (信息采集) 和 `Verifier` (核心验证) 的基础接口标准。优先实现 `Research Worker` 和 `Critic` 作为首批实现类。
+*   [x] **Orchestrator Logic**: 实现具备递归与熔断（Circuit Breaker）能力的通用编排引擎。
+*   [x] **Dev Observability**: 集成 **Langfuse Cloud**，为每个 Worker 节点配置标准化的 Trace Span，用于调试。
+*   [x] **Process Visualization**: 开发实时前端 UI，将分形编排的“递归思维树”可视化展示给最终用户。
 
 ### Phase 2: 架构解耦与能力深化 (Abstraction & Deepening)
 **目标**: 完成所有 Worker 角色的完全解耦，并引入深度计算能力。

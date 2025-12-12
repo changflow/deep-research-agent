@@ -400,3 +400,130 @@ textarea:focus, input:focus {
     text-decoration: none;
     color: #000; /* Links black for print */
 }
+
+/* -----------------------------------
+   Visualization Tree View Styles
+   ----------------------------------- */
+
+.section-header {
+    display: flex;
+    align-items: center; /* Vertical center */
+    margin-bottom: 1rem;
+    gap: 1rem;
+}
+
+.section-header h2 {
+    margin: 0; /* Override default margin */
+    font-size: 1.5rem;
+}
+
+.tree-view {
+    padding: 1rem;
+    overflow-y: auto; /* Scroll vertically */
+    overflow-x: auto; /* Scroll horizontally if needed */
+    max-height: 400px; /* Fixed window height */
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background-color: #fcfcfc;
+    transition: max-height 0.3s ease-in-out, padding 0.3s ease, margin 0.3s ease, opacity 0.3s ease;
+}
+
+.tree-view.collapsed {
+    max-height: 0;
+    padding: 0;
+    margin: 0;
+    border: none;
+    overflow: hidden;
+    opacity: 0;
+    display: none !important;
+}
+
+/* Custom button style for text-only toggle */
+.btn.text-only {
+    background: none;
+    border: none;
+    color: var(--secondary-color);
+    padding: 5px; /* Increase hit area */
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-decoration: underline;
+    position: relative; /* Ensure z-index works */
+    z-index: 10;
+}
+
+.btn.text-only:hover {
+    color: var(--primary-color);
+    background: rgba(0,0,0,0.05); /* Slight hover effect */
+    border-radius: 4px;
+}
+
+.tree-root {
+    margin-bottom: 1rem;
+}
+
+.node-root {
+    font-weight: bold;
+    font-size: 1.1em;
+    color: var(--primary-color);
+}
+
+.tree-branch, .tree-sub-branch {
+    list-style-type: none;
+    padding-left: 20px;
+    border-left: 2px solid var(--border-color);
+}
+
+.tree-item {
+    position: relative;
+    padding-left: 20px;
+    margin-top: 1rem;
+}
+
+.tree-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 15px; /* Adjust based on line-height/font-size */
+    width: 20px;
+    height: 2px;
+    background-color: var(--border-color);
+}
+
+.node-step {
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background-color: white;
+    display: inline-block;
+    min-width: 200px;
+}
+
+.node-step.node-active {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+.step-status {
+    margin-right: 0.5rem;
+    font-size: 1.2em;
+}
+
+.step-title {
+    font-weight: 600;
+}
+
+.step-desc {
+    margin-top: 0.25rem;
+    font-size: 0.85em;
+    color: var(--secondary-color);
+}
+
+.node-sub {
+    font-size: 0.9em;
+    color: var(--secondary-color);
+    padding: 0.25rem 0.5rem;
+    border: 1px dashed var(--border-color);
+    border-radius: 4px;
+    background-color: #f8fafc;
+    display: inline-block;
+}

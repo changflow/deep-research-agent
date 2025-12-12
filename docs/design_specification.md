@@ -112,9 +112,11 @@ graph TD
 
 *   **设计模式**: 装饰器模式 + 责任链模式。
 *   **机制**: 每个 Graph Node 被 `MiddlewareManager` 包装。
+*   **上下文优化配置**:
+    *   `ENABLE_AUTO_CONTEXT`: 通过环境变量控制是否启用自动上下文嵌入 (Auto-Embedding) 和检索。默认关闭以优化响应速度，适用于无需长时记忆的快速研究任务。
 *   **生命周期钩子**:
-    *   `before_node_execution`: 节点执行前触发 (如：开始计时、创建 Trace Span)。
-    *   `after_node_execution`: 节点成功后触发 (如：记录性能、更新 Trace)。
+    *   `before_node_execution`: 节点执行前触发 (如：开始计时、创建 Trace Span、上下文检索)。
+    *   `after_node_execution`: 节点成功后触发 (如：记录性能、更新 Trace、知识存储)。
     *   `on_error`: 节点抛出异常时触发 (如：错误分类、重试策略)。
 
 ### 3.3 Human-in-the-Loop (HITL) 机制
